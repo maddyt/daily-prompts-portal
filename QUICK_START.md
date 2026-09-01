@@ -29,15 +29,16 @@ https://github.com/maddyt/daily-prompts-portal
 1. Go to [vercel.com](https://vercel.com) and sign in
 2. Click **"Add New"** > **"Project"**
 3. Click **"Import"** next to your `daily-prompts-portal` repository
-4. Click **"Import"**
-5. Under **"Environment Variables"**, add:
+4. **IMPORTANT**: Before clicking "Deploy", set **Root Directory** to `frontend`
+5. Click **"Deploy"**
+6. Under **"Environment Variables"**, add:
    ```
    NEXT_PUBLIC_SUPABASE_URL = [paste your SUPABASE_URL here]
    NEXT_PUBLIC_SUPABASE_ANON_KEY = [paste your SUPABASE_KEY here]
    ```
-6. Click **"Deploy"**
-7. Wait for deployment to complete (usually 2-3 minutes)
-8. Click **"Visit"** to see your live portal!
+7. Click **"Save"** and **"Redeploy"**
+8. Wait for deployment to complete (2-3 minutes)
+9. Click **"Visit"** to see your live portal!
 
 **Your portal is now live at**: `https://your-project.vercel.app`
 

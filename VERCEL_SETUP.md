@@ -1,50 +1,49 @@
 # Vercel Deployment Guide
 
-## Quick Start
+## Step-by-Step Setup (Required)
 
 ### 1. Connect Repository to Vercel
 
-```bash
-# Option A: Using Vercel CLI
-npm i -g vercel
-vercel
+Go to [vercel.com/dashboard](https://vercel.com/dashboard):
+1. Click **"Add New"** > **"Project"**
+2. Click **"Import"** next to `daily-prompts-portal` from GitHub
+3. Click **"Import"**
 
-# Option B: Using Vercel Dashboard
-# Go to https://vercel.com/dashboard
-# Click "Add New..." > "Project"
-# Import your GitHub repository
+### 2. **IMPORTANT: Configure Root Directory**
+
+⚠️ **This step is crucial!** The repository has a monorepo structure with `frontend/` as a subdirectory.
+
+In the import dialog, before clicking "Deploy":
+1. Look for **"Root Directory"** option
+2. Change it from `.` to `frontend`
+3. Click **"Save"** and then **"Deploy"**
+
+**If you already imported**, no problem:
+1. Go to **Settings > General**
+2. Scroll down to **"Root Directory"**
+3. Change from `.` to `frontend`
+4. Save
+
+### 3. Set Environment Variables
+
+1. Go to **Settings > Environment Variables**
+2. Add the following variables:
+
 ```
-
-### 2. Set Environment Variables
-
-In Vercel Dashboard:
-1. Select your project
-2. Go to **Settings > Environment Variables**
-3. Add the following variables:
-
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+NEXT_PUBLIC_SUPABASE_URL = your_supabase_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY = your_supabase_anon_key_here
 ```
 
 **Note**: The `NEXT_PUBLIC_` prefix makes these variables accessible in the browser. Only use public/anon keys here, never private keys.
 
-### 3. Configure Build Settings
+### 4. Trigger Build
 
-Vercel should auto-detect Next.js. If not:
-- **Framework**: Next.js
-- **Build Command**: `cd frontend && npm run build`
-- **Output Directory**: `frontend/.next`
-- **Root Directory**: `.` (or leave empty)
+Once Root Directory is set to `frontend`:
+1. Go to **Deployments** tab
+2. Click the three dots on any deployment
+3. Click **"Redeploy"**
 
-### 4. Deploy
-
-```bash
-# Using CLI
-vercel --prod
-
-# Or use GitHub integration (automatic on push)
-```
+The build should now succeed! ✅
 
 ## Accessing Your Portal
 
