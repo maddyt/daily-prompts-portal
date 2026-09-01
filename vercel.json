@@ -1,15 +1,7 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/next@latest",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "memory": 3008,
-        "regions": ["iad1"]
-      }
-    }
-  ],
+  "buildCommand": "npm run build",
+  "installCommand": "cd frontend && npm install",
+  "framework": "nextjs",
   "outputDirectory": "frontend/.next"
 }
