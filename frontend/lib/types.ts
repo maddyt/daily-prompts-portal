@@ -7,4 +7,4 @@ interface DailyPrompt {
   updated_at: string;
 }
 
-export { DailyPrompt };
+export type { DailyPrompt };
