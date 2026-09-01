@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.prompt-card {
+  @apply bg-white rounded-lg shadow-lg p-8 hover:shadow-2xl transition-shadow duration-300;
+}
+
+.prompt-date {
+  @apply text-sm font-semibold text-purple-600 uppercase tracking-wider;
+}
+
+.prompt-text {
+  @apply text-lg font-bold text-gray-800 my-4;
+}
+
+.prompt-response {
+  @apply text-gray-700 leading-relaxed italic;
+}
+
+.loading {
+  @apply flex items-center justify-center;
+}
+
+.loading-spinner {
+  @apply animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500;
+}
