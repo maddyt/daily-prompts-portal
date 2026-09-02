@@ -1,0 +1,7 @@
+steps:
+  - name: Setup Supabase environment
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+    run: |
+      node scripts/generate-daily-prompt.js
