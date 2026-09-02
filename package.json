@@ -2,5 +2,8 @@
   "name": "daily-prompts-portal",
   "description": "Daily prompts portal with Copilot automation and Supabase storage",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0"
+  }
 }
