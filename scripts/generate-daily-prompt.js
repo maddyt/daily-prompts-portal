@@ -31,23 +31,10 @@ async function generateDailyPrompt() {
 
   // Define today's date
   const today = new Date().toISOString().split('T')[0];
+  const now = new Date().toISOString();
 
-  // Check if prompt already exists for today
-  const { data: existingPrompt, error: checkError } = await supabase
-    .from('daily_prompts')
-    .select('id')
-    .eq('date', today)
-    .single();
-
-  if (checkError && checkError.code !== 'PGRST116') {
-    // PGRST116 = no rows found, which is expected
-    throw checkError;
-  }
-
-  if (existingPrompt) {
-    console.log(`Prompt already exists for ${today}. Skipping.`);
-    return existingPrompt;
-  }
+  // Note: We allow multiple prompts per day, each with its own timestamp
+  // Remove the check for existing prompts - just generate and insert
 
   // Generate prompt using GitHub Copilot API
   const copilotToken = process.env.COPILOT_API_TOKEN;
@@ -100,16 +87,17 @@ Make sure it's different and unique each day.`;
     throw error;
   }
 
-  const generatedPrompt = generatedResponse;
+  console.log(`✅ Daily prompt generated for ${today} at ${now}`);
+  console.log(`Prompt: ${generatedPrompt}`);
 
-  // Insert into Supabase
+  // Insert into Supabase (allows multiple rows per day, tracked by created_at timestamp)
   const { data: newPrompt, error: insertError } = await supabase
     .from('daily_prompts')
     .insert([
       {
         date: today,
         prompt: generatedPrompt,
-        response: generatedResponse,
+        response: generatedPrompt,
       },
     ])
     .select()
@@ -119,8 +107,7 @@ Make sure it's different and unique each day.`;
     throw insertError;
   }
 
-  console.log(`✅ Daily prompt saved for ${today}`);
-  console.log(`Prompt: ${newPrompt.prompt}`);
+  console.log(`✅ Daily prompt saved for ${today} at ${new Date(newPrompt.created_at).toLocaleTimeString()}`);
   console.log(`Response: ${newPrompt.response}`);
 
   return newPrompt;
