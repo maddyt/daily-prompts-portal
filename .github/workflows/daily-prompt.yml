@@ -20,7 +20,33 @@ jobs:
           node-version: '20'
       - run: npm install
       - run: npm install ws --no-audit --no-fund --silent
+      - name: Save prompt via Supabase REST
+        run: |
+          python3 - <<'PY'
+          import os, json, urllib.request, datetime
+          url = os.environ['SUPABASE_URL'].rstrip('/') + '/rest/v1/daily_prompts'
+          key = os.environ['SUPABASE_KEY']
+          prompt = os.environ.get('COPILOT_PROMPT','')
+          data = {
+            'date': datetime.datetime.utcnow().date().isoformat(),
+            'prompt': prompt,
+            'response': prompt,
+          }
+          req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers={
+            'apikey': key,
+            'Authorization': 'Bearer ' + key,
+            'Content-Type': 'application/json'
+          }, method='POST')
+          with urllib.request.urlopen(req) as resp:
+            print(resp.status)
+            print(resp.read().decode())
+          PY
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          COPILOT_PROMPT: ${{ github.event.inputs.copilot_prompt }}
       - run: node scripts/generate-daily-prompt.js
+        continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
