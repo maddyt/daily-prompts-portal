@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@supabase/supabase-js": "^2.38.0",
+    "@anthropic-ai/sdk": "^0.20.0",
     "ws": "^8.13.0"
   }
 }
