@@ -60,7 +60,7 @@ Make sure it's different and unique each day.`;
   let generatedResponse;
   try {
     const message = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-3-5-sonnet-latest',
       max_tokens: 1024,
       system: systemPrompt,
       messages: [
@@ -77,6 +77,7 @@ Make sure it's different and unique each day.`;
     throw error;
   }
 
+  const generatedPrompt = generatedResponse.trim();
   console.log(`✅ Daily prompt generated for ${today} at ${now}`);
   console.log(`Prompt: ${generatedPrompt}`);
 
