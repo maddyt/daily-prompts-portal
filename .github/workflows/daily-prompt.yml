@@ -23,3 +23,5 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          COPILOT_PROMPT: ${{ github.event.inputs.copilot_prompt }}
+          COPILOT_RESPONSE: ${{ github.event.inputs.copilot_prompt }}
