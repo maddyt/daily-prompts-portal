@@ -76,8 +76,10 @@ Make sure it's different and unique each day.`;
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Copilot API error: ${response.status} ${JSON.stringify(errorData)}`);
+      const responseText = await response.text();
+      console.error(`API Response Status: ${response.status}`);
+      console.error(`API Response Body: ${responseText.substring(0, 500)}`);
+      throw new Error(`Copilot API error: ${response.status}`);
     }
 
     const data = await response.json();
