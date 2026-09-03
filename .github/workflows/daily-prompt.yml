@@ -19,6 +19,7 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
+      - run: npm install ws --no-audit --no-fund --silent
       - run: node scripts/generate-daily-prompt.js
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
