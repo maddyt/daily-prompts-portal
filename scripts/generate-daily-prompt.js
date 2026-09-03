@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const Anthropic = require('@anthropic-ai/sdk');
 
 /**
  * Generate a daily prompt using Copilot automation and store in Supabase
@@ -36,12 +37,6 @@ async function generateDailyPrompt() {
   // Note: We allow multiple prompts per day, each with its own timestamp
   // Remove the check for existing prompts - just generate and insert
 
-  // Generate prompt using GitHub Copilot API
-  const copilotToken = process.env.COPILOT_API_TOKEN;
-  if (!copilotToken) {
-    throw new Error('COPILOT_API_TOKEN environment variable is required');
-  }
-
   const systemPrompt = `You are a creative daily prompt generator. Generate an interesting, unique, and thought-provoking prompt for the day. 
 The prompt should be something a user can think about, explore, or use for creative writing, coding, or personal reflection.
 Keep it concise but engaging (1-2 sentences).
@@ -54,38 +49,31 @@ Make sure it's different and unique each day.`;
     day: 'numeric' 
   })}. Respond with just the prompt, no explanation.`;
 
+  // Generate prompt using Anthropic Claude API
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (!anthropicKey) {
+    throw new Error('ANTHROPIC_API_KEY environment variable is required');
+  }
+
+  const client = new Anthropic({ apiKey: anthropicKey });
+
   let generatedResponse;
   try {
-    const response = await fetch('https://api.githubcopilot.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${copilotToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 1,
-        top_p: 1,
-        n: 1,
-        stream: false,
-      }),
+    const message = await client.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [
+        { role: 'user', content: userPrompt },
+      ],
     });
 
-    if (!response.ok) {
-      const responseText = await response.text();
-      console.error(`API Response Status: ${response.status}`);
-      console.error(`API Response Body: ${responseText.substring(0, 500)}`);
-      throw new Error(`Copilot API error: ${response.status}`);
+    generatedResponse = message.content?.[0]?.text || 'Failed to generate response';
+    if (!generatedResponse) {
+      throw new Error('No text content in Claude response');
     }
-
-    const data = await response.json();
-    generatedResponse = data.choices?.[0]?.message?.content || 'Failed to generate response';
   } catch (error) {
-    console.error('Error calling Copilot API:', error.message);
+    console.error('Error calling Anthropic API:', error.message);
     throw error;
   }
 
