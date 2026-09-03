@@ -14,7 +14,20 @@ async function generateDailyPrompt() {
     throw new Error('SUPABASE_URL and SUPABASE_KEY environment variables are required');
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  // Provide a WebSocket transport for Realtime when running Node < 22
+  let createOptions = {};
+  try {
+    const nodeMajor = parseInt(process.versions.node.split('.')[0], 10);
+    if (!isNaN(nodeMajor) && nodeMajor < 22) {
+      // ws provides WebSocket support for Node.js environments < 22
+      const ws = require('ws');
+      createOptions = { realtime: { transport: ws } };
+    }
+  } catch (e) {
+    // ignore and proceed without custom transport
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey, createOptions);
 
   // Define today's date
   const today = new Date().toISOString().split('T')[0];
