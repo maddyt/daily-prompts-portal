@@ -60,7 +60,7 @@ Make sure it's different and unique each day.`;
   let generatedResponse;
   try {
     const message = await client.messages.create({
-      model: 'claude-3-5-sonnet-latest',
+      model: 'claude-3-haiku-20240307',
       max_tokens: 1024,
       system: systemPrompt,
       messages: [
