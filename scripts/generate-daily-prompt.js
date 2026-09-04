@@ -80,6 +80,7 @@ Make sure it's different and unique each day.`;
 
   const generatedPrompt = generatedResponse.trim();
   const generatedResponsePayload = JSON.stringify({
+    type: 'anthropic-response',
     model: 'claude-haiku-4-5-20251001',
     generated_at: now,
     raw_text: generatedResponse,
