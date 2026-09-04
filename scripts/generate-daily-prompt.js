@@ -1,5 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic = require('@anthropic-ai/sdk');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * Generate a daily prompt using Copilot automation and store in Supabase
@@ -29,27 +31,11 @@ async function generateDailyPrompt() {
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey, createOptions);
+  const promptsPath = path.join(__dirname, '..', 'config', 'daily-prompts.json');
+  const promptConfig = JSON.parse(fs.readFileSync(promptsPath, 'utf8'));
 
-  // Define today's date
   const today = new Date().toISOString().split('T')[0];
   const now = new Date().toISOString();
-
-  // Note: We allow multiple prompts per day, each with its own timestamp
-  // Remove the check for existing prompts - just generate and insert
-
-  const systemPrompt = `You are a creative daily prompt generator. Generate an interesting, unique, and thought-provoking prompt for the day. 
-The prompt should be something a user can think about, explore, or use for creative writing, coding, or personal reflection.
-Keep it concise but engaging (1-2 sentences).
-Make sure it's different and unique each day.`;
-
-  const userPrompt = `Generate today's unique daily prompt for ${new Date().toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  })}. Respond with just the prompt, no explanation.`;
-
-  // Generate prompt using Anthropic Claude API
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (!anthropicKey) {
     throw new Error('ANTHROPIC_API_KEY environment variable is required');
@@ -57,75 +43,66 @@ Make sure it's different and unique each day.`;
 
   const client = new Anthropic({ apiKey: anthropicKey });
 
-  let generatedResponse;
-  let generatedMessage;
-  try {
-    generatedMessage = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: [
-        { role: 'user', content: userPrompt },
-      ],
-    });
+  const systemPrompt = `You are a polished daily prompt portal assistant.
+Create a complete, well-structured response for the supplied user prompt.
+Format it so it renders nicely in a web portal:
+- begin with a concise title or lead sentence
+- use short paragraphs and optional bullet points
+- be substantive, specific, and helpful
+- if the prompt asks for current events, summarize clearly, note uncertainty, and avoid pretending to know live facts without grounding
+- keep the tone intelligent, engaging, and editorial
+Return only the final formatted response with no preamble or markdown fence.`;
 
-    generatedResponse = generatedMessage.content?.[0]?.text || 'Failed to generate response';
+  const results = [];
+
+  for (const entry of promptConfig) {
+    if (!entry?.prompt) {
+      throw new Error('Invalid prompt config entry: missing prompt');
+    }
+
+    const userPrompt = `User prompt:\n${entry.prompt}\n\nWrite the best possible portal-ready response.`;
+    console.log(`Generating response for prompt: ${entry.id || 'unnamed-prompt'}`);
+
+    let generatedMessage;
+    try {
+      generatedMessage = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2048,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+      });
+    } catch (error) {
+      console.error('Error calling Anthropic API:', error.message);
+      throw error;
+    }
+
+    const generatedResponse = generatedMessage.content?.[0]?.text?.trim();
     if (!generatedResponse) {
       throw new Error('No text content in Claude response');
     }
-  } catch (error) {
-    console.error('Error calling Anthropic API:', error.message);
-    throw error;
-  }
 
-  const generatedPrompt = generatedResponse.trim();
-  console.log(`✅ Daily prompt generated for ${today} at ${now}`);
-  console.log(`Prompt: ${generatedPrompt}`);
+    const { data: newPrompt, error: insertError } = await supabase
+      .from('daily_prompts')
+      .insert([
+        {
+          date: today,
+          prompt: entry.prompt,
+          response: generatedResponse,
+        },
+      ])
+      .select()
+      .single();
 
-  // Generate an example answer/response to the prompt for display in the portal
-  let generatedExampleResponse;
-  try {
-    const exampleMessage = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      system: 'You are a thoughtful responder. Provide a creative, meaningful, and concise example answer to the given prompt. Keep it 2-3 sentences.',
-      messages: [
-        { role: 'user', content: `Here is a prompt for today: "${generatedPrompt}"\n\nProvide an example answer to this prompt.` },
-      ],
-    });
-
-    generatedExampleResponse = exampleMessage.content?.[0]?.text || 'Failed to generate response';
-    if (!generatedExampleResponse) {
-      throw new Error('No text content in Claude response for example answer');
+    if (insertError) {
+      throw insertError;
     }
-  } catch (error) {
-    console.error('Error generating example response:', error.message);
-    throw error;
+
+    results.push(newPrompt);
+    console.log(`✅ Saved ${entry.id || entry.prompt.slice(0, 40)} at ${new Date(newPrompt.created_at).toLocaleTimeString()}`);
   }
 
-  const exampleResponse = generatedExampleResponse.trim();
-  console.log(`Example Response: ${exampleResponse}`);
-
-  // Insert into Supabase (allows multiple rows per day, tracked by created_at timestamp)
-  const { data: newPrompt, error: insertError } = await supabase
-    .from('daily_prompts')
-    .insert([
-      {
-        date: today,
-        prompt: generatedPrompt,
-        response: exampleResponse,
-      },
-    ])
-    .select()
-    .single();
-
-  if (insertError) {
-    throw insertError;
-  }
-
-  console.log(`✅ Daily prompt saved for ${today} at ${new Date(newPrompt.created_at).toLocaleTimeString()}`);
-
-  return newPrompt;
+  console.log(`✅ Generated ${results.length} prompt response(s) for ${today} at ${now}`);
+  return results;
 }
 
 // Run the function
