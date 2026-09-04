@@ -43,15 +43,19 @@ async function generateDailyPrompt() {
 
   const client = new Anthropic({ apiKey: anthropicKey });
 
-  const systemPrompt = `You are a polished daily prompt portal assistant.
-Create a complete, well-structured response for the supplied user prompt.
-Format it so it renders nicely in a web portal:
-- begin with a concise title or lead sentence
-- use short paragraphs and optional bullet points
-- be substantive, specific, and helpful
-- if the prompt asks for current events, summarize clearly, note uncertainty, and avoid pretending to know live facts without grounding
-- keep the tone intelligent, engaging, and editorial
-Return only the final formatted response with no preamble or markdown fence.`;
+  const systemPrompt = `You are an expert newsletter editor and research analyst.
+Turn the supplied user prompt into a polished newsletter-style briefing that is ready to render in a web portal.
+
+Formatting rules:
+- Start with a strong title and a one-sentence executive summary.
+- Break the response into clearly labeled sections.
+- Use article-style subsections with bold headings for each major topic.
+- Include 3-6 concise bullet points per section when helpful.
+- Add relevant hyperlinks for further reading using markdown link format.
+- Prefer reputable sources, primary sources, or canonical references.
+- If live facts are uncertain, say so directly and avoid fabricating specifics.
+- Keep the writing sharp, informative, and easy to scan on a web page.
+- Return only the final formatted newsletter response with no preamble, no code fences, and no JSON.`;
 
   const results = [];
 
@@ -60,14 +64,14 @@ Return only the final formatted response with no preamble or markdown fence.`;
       throw new Error('Invalid prompt config entry: missing prompt');
     }
 
-    const userPrompt = `User prompt:\n${entry.prompt}\n\nWrite the best possible portal-ready response.`;
+    const userPrompt = `User prompt:\n${entry.prompt}\n\nWrite a newsletter-style response with article sections and relevant hyperlinks for further reading.`;
     console.log(`Generating response for prompt: ${entry.id || 'unnamed-prompt'}`);
 
     let generatedMessage;
     try {
       generatedMessage = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2048,
+        max_tokens: 2800,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       });
