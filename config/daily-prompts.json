@@ -2,9 +2,5 @@
   {
     "id": "ai-news-agents-investment-banking",
     "prompt": "I want you to gather all the latest AI news and turn it into a newsletter-style briefing. I'm specifically interested in knowing what is happening in the areas of Agents and their use in Investment Banking. Include article-like sections, a concise executive summary, and relevant hyperlinks for further reading."
-  },
-  {
-    "id": "daily-generic-prompt",
-    "prompt": "Generate a thoughtful daily prompt about creativity, technology, or reflection that helps a user think deeply and write a meaningful response."
   }
 ]
