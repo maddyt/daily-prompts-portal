@@ -69,10 +69,20 @@ export function PromptsList() {
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-      {prompts.map((prompt) => (
-        <PromptCard key={prompt.id} prompt={prompt} />
-      ))}
+    <div className="space-y-8">
+      {prompts.length > 0 && (
+        <div className="prompt-featured">
+          <PromptCard prompt={prompts[0]} />
+        </div>
+      )}
+
+      {prompts.length > 1 && (
+        <div className="prompt-archive">
+          {prompts.slice(1).map((prompt) => (
+            <PromptCard key={prompt.id} prompt={prompt} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
