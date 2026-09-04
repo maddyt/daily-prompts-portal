@@ -70,7 +70,7 @@ export function PromptsList() {
 
   return (
     <div className="space-y-8">
-      {prompts.length > 0 && (
+      {prompts[0] && (
         <div className="prompt-featured">
           <PromptCard prompt={prompts[0]} />
         </div>
