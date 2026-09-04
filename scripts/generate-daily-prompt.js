@@ -79,12 +79,7 @@ Make sure it's different and unique each day.`;
   }
 
   const generatedPrompt = generatedResponse.trim();
-  const generatedResponsePayload = JSON.stringify({
-    type: 'anthropic-response',
-    model: 'claude-haiku-4-5-20251001',
-    generated_at: now,
-    raw_text: generatedResponse,
-  });
+  const generatedResponsePayload = `AI response generated at ${now} using claude-haiku-4-5-20251001`;
   console.log(`✅ Daily prompt generated for ${today} at ${now}`);
   console.log(`Prompt: ${generatedPrompt}`);
 
