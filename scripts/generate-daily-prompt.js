@@ -88,7 +88,7 @@ Make sure it's different and unique each day.`;
       {
         date: today,
         prompt: generatedPrompt,
-        response: generatedPrompt,
+        response: generatedResponse,
       },
     ])
     .select()
