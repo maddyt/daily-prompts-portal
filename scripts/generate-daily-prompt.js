@@ -82,6 +82,30 @@ Make sure it's different and unique each day.`;
   console.log(`✅ Daily prompt generated for ${today} at ${now}`);
   console.log(`Prompt: ${generatedPrompt}`);
 
+  // Generate an example answer/response to the prompt for display in the portal
+  let generatedExampleResponse;
+  try {
+    const exampleMessage = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      system: 'You are a thoughtful responder. Provide a creative, meaningful, and concise example answer to the given prompt. Keep it 2-3 sentences.',
+      messages: [
+        { role: 'user', content: `Here is a prompt for today: "${generatedPrompt}"\n\nProvide an example answer to this prompt.` },
+      ],
+    });
+
+    generatedExampleResponse = exampleMessage.content?.[0]?.text || 'Failed to generate response';
+    if (!generatedExampleResponse) {
+      throw new Error('No text content in Claude response for example answer');
+    }
+  } catch (error) {
+    console.error('Error generating example response:', error.message);
+    throw error;
+  }
+
+  const exampleResponse = generatedExampleResponse.trim();
+  console.log(`Example Response: ${exampleResponse}`);
+
   // Insert into Supabase (allows multiple rows per day, tracked by created_at timestamp)
   const { data: newPrompt, error: insertError } = await supabase
     .from('daily_prompts')
@@ -89,7 +113,7 @@ Make sure it's different and unique each day.`;
       {
         date: today,
         prompt: generatedPrompt,
-        response: generatedResponse,
+        response: exampleResponse,
       },
     ])
     .select()
@@ -100,7 +124,6 @@ Make sure it's different and unique each day.`;
   }
 
   console.log(`✅ Daily prompt saved for ${today} at ${new Date(newPrompt.created_at).toLocaleTimeString()}`);
-  console.log(`Response: ${newPrompt.response}`);
 
   return newPrompt;
 }
