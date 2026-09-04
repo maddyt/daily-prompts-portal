@@ -58,8 +58,9 @@ Make sure it's different and unique each day.`;
   const client = new Anthropic({ apiKey: anthropicKey });
 
   let generatedResponse;
+  let generatedMessage;
   try {
-    const message = await client.messages.create({
+    generatedMessage = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       system: systemPrompt,
@@ -68,7 +69,7 @@ Make sure it's different and unique each day.`;
       ],
     });
 
-    generatedResponse = message.content?.[0]?.text || 'Failed to generate response';
+    generatedResponse = generatedMessage.content?.[0]?.text || 'Failed to generate response';
     if (!generatedResponse) {
       throw new Error('No text content in Claude response');
     }
@@ -78,6 +79,12 @@ Make sure it's different and unique each day.`;
   }
 
   const generatedPrompt = generatedResponse.trim();
+  const generatedResponsePayload = JSON.stringify({
+    type: 'anthropic-response',
+    model: 'claude-haiku-4-5-20251001',
+    generated_at: now,
+    raw_text: generatedResponse,
+  });
   console.log(`✅ Daily prompt generated for ${today} at ${now}`);
   console.log(`Prompt: ${generatedPrompt}`);
 
@@ -88,7 +95,7 @@ Make sure it's different and unique each day.`;
       {
         date: today,
         prompt: generatedPrompt,
-        response: generatedPrompt,
+        response: generatedResponsePayload,
       },
     ])
     .select()
